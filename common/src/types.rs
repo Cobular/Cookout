@@ -1,21 +1,22 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap};
 
+use juniper::GraphQLObject;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, GraphQLObject)]
+#[derive(Debug, Serialize, Deserialize, GraphQLObject, Clone)]
 #[graphql(description="An ingredient in a recipe")]
 pub struct Ingredient {
     pub name: String,
     pub quantity: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, GraphQLObject)]
+#[derive(Debug, Serialize, Deserialize, GraphQLObject, Clone)]
 #[graphql(description="An instruction in a recipe")]
 pub struct Instruction {
     pub instruction: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, GraphQLObject)]
+#[derive(Debug, Serialize, Deserialize, GraphQLObject, Clone)]
 #[graphql(description="A whole recipe entry")]
 pub struct Recipe {
     pub name: String,
@@ -25,12 +26,12 @@ pub struct Recipe {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct RecipeBook(pub HashMap<String, Recipe>);
+pub struct RecipeBook(pub BTreeMap<String, Recipe>);
 
 impl RecipeBook {
     pub fn new() -> RecipeBook {
-        let hashmap= HashMap::new();
-        RecipeBook(hashmap)
+        let map= BTreeMap::new();
+        RecipeBook(map)
     }
 }
 

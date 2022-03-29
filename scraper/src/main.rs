@@ -52,10 +52,10 @@ fn parse_from_url_to_file(
 
 fn parse_recipe_book(client: &Client, urls: Vec<&str>) -> RecipeBook {
     let mut recipe_book = RecipeBook::new();
-    let hashmap = &mut recipe_book.0;
+    let map = &mut recipe_book.0;
     for url in urls {
         match parse_from_url(client, url) {
-            Ok(recipe) => (*hashmap).insert(prep_name_for_file(&recipe.name).to_owned(), recipe),
+            Ok(recipe) => (*map).insert(prep_name_for_file(&recipe.name).to_owned(), recipe),
             Err(err) => {
                 error!("{}", err);
                 continue;
