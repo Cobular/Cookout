@@ -1,7 +1,7 @@
-use reqwest::blocking::{Response, Client};
+use reqwest::{Response, Client};
 
-pub fn load_page(client: &Client, url: &str) -> reqwest::Result<Response> {
-    let res = client.get(url).send()?;
+pub async fn load_page(client: &Client, url: &str) -> reqwest::Result<Response> {
+    let res = client.get(url).send().await?;
     Ok(res)
 }
 

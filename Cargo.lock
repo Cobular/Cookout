@@ -1539,12 +1539,16 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 name = "scraper"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "common",
+ "futures",
  "lazy_static",
  "log",
+ "regex",
  "reqwest",
  "scraper 0.12.0",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -1679,6 +1683,7 @@ dependencies = [
  "env_logger",
  "juniper",
  "juniper_warp",
+ "lazy_static",
  "log",
  "serde_json",
  "tokio",

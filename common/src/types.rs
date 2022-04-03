@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap};
+use std::collections::{BTreeMap, HashMap};
 
 use juniper::GraphQLObject;
 use serde::{Deserialize, Serialize};
@@ -26,11 +26,11 @@ pub struct Recipe {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct RecipeBook(pub BTreeMap<String, Recipe>);
+pub struct RecipeBook(pub HashMap<String, Recipe>);
 
 impl RecipeBook {
     pub fn new() -> RecipeBook {
-        let map= BTreeMap::new();
+        let map = HashMap::new();
         RecipeBook(map)
     }
 }

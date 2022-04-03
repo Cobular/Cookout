@@ -1,5 +1,7 @@
-use std::io::{Error, ErrorKind};
+use std::{io::{Error, ErrorKind}};
 
+use anyhow::Context;
+use log::error;
 use scraper::Html;
 
 use crate::{NAME_SELECTOR, INGREDIENTS_SELECTOR, INSTRUCTIONS_TEXT_SELECTOR};
@@ -55,11 +57,13 @@ fn parse_name(content: &str) -> Result<String, Error> {
   Ok(name_element)
 }
 
-pub fn parse_recipe(hellofresh_page_content: &str, url: &str) -> Recipe {
-  Recipe {
-      name: parse_name(hellofresh_page_content).expect("Failed to find name of recipe"),
-      url: url.to_owned(),
+pub fn parse_recipe(hellofresh_page_content: &str, url: &str) -> anyhow::Result<Recipe> {
+  let url = url.to_owned();
+  let name = parse_name(hellofresh_page_content).context(url.to_owned())?;
+  Ok(Recipe {
+      name,
+      url,
       ingredients: parse_ingredients(hellofresh_page_content),
       instructions: parse_instructions(hellofresh_page_content),
-  }
+  })
 }

@@ -3,11 +3,22 @@ use std::{env, fs::File};
 use juniper::{graphql_object, EmptyMutation, EmptySubscription, FieldResult};
 
 use common::types::{Recipe, RecipeBook};
-use serde_json;
 use warp::{hyper::Response, Filter};
 
 struct Context {
-    database: RecipeBook,
+    database: &'static RecipeBook,
+}
+
+#[macro_use]
+extern crate lazy_static;
+
+lazy_static! {
+    static ref RECIPE_BOOK: RecipeBook = {
+        let reader =
+            &File::open("data/RecipeBook.json").expect("Failed to find data/RecipeBook.json");
+
+        serde_json::from_reader(reader).unwrap()
+    };
 }
 
 // To make our context usable by Juniper, we have to implement a marker trait.
@@ -100,13 +111,11 @@ async fn main() {
             )
     });
 
-    log::info!("Listening on 127.0.0.1:8080");
+    println!("Listening on 127.0.0.1:8080");
 
-    let state = warp::any().map(move || {
-        let reader = &File::open("data/RecipeBook.json").expect("Failed to find data/RecipeBook.json");
-
+    let state = warp::any().map(|| {
         Context {
-            database: serde_json::from_reader(reader).unwrap(),
+            database: &RECIPE_BOOK
         }
     });
     let graphql_filter = juniper_warp::make_graphql_filter(schema(), state.boxed());
