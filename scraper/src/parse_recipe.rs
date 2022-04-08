@@ -1,7 +1,6 @@
-use std::{io::{Error, ErrorKind}};
+use std::io::{Error, ErrorKind};
 
 use anyhow::Context;
-use log::error;
 use scraper::Html;
 
 use crate::{NAME_SELECTOR, INGREDIENTS_SELECTOR, INSTRUCTIONS_TEXT_SELECTOR};
@@ -14,7 +13,7 @@ fn parse_instructions(content: &str) -> Vec<Instruction> {
   let instructions = parsed_html
       .select(&INSTRUCTIONS_TEXT_SELECTOR)
       .flat_map(|el| el.text())
-      .map(|el_text: &str| Instruction { instruction: el_text.to_owned() })
+      .map(|el_text: &str| Instruction { instruction: el_text.to_string() })
       .collect::<Vec<Instruction>>();
 
   instructions
