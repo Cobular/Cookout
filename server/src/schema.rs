@@ -1,6 +1,8 @@
 use common::types::{RecipeBook, Recipe};
 use juniper::{graphql_object, FieldResult};
 
+use crate::RECIPE_BOOK;
+
 
 pub struct Context {
   pub database: &'static RecipeBook,
@@ -8,6 +10,14 @@ pub struct Context {
 
 // To make our context usable by Juniper, we have to implement a marker trait.
 impl juniper::Context for Context {}
+
+impl Context {
+  pub fn new() -> Self {
+    Context {
+      database: &RECIPE_BOOK,
+    }
+  }
+}
 
 pub struct Query;
 

@@ -1,13 +1,17 @@
-use std::{env, fs::File};
-
-use juniper::{EmptyMutation, EmptySubscription};
+use std::fs::File;
 
 use common::types::RecipeBook;
-use warp::{hyper::Response, Filter};
+use juniper::{EmptyMutation, EmptySubscription, RootNode};
+use rocket::Rocket;
 
-use crate::query::{Query, Context};
+use crate::schema::{Context, Query};
+use crate::graphql_endpoints::{graphiql, get_graphql_handler, post_graphql_handler};
 
-mod query;
+mod schema;
+mod graphql_endpoints;
+mod merge_ingredients_endpoints;
+
+type Schema = RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
 
 #[macro_use]
 extern crate lazy_static;
@@ -21,51 +25,20 @@ lazy_static! {
     };
 }
 
-// A root schema consists of a query and a mutation.
-// Request queries can be executed against a RootNode.
-type Schema = juniper::RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
-
-fn schema() -> Schema {
-    Schema::new(
-        Query,
-        EmptyMutation::<Context>::new(),
-        EmptySubscription::<Context>::new(),
-    )
-}
-
-#[tokio::main]
+#[rocket::main]
 async fn main() {
-    env::set_var("RUST_LOG", "warp_server");
-    env_logger::init();
-
-    let log = warp::log("warp_server");
-
-    let homepage = warp::path::end().map(|| {
-        Response::builder()
-            .header("content-type", "text/html")
-            .body(
-                "<html><h1>juniper_warp</h1><div>visit <a href=\"/graphiql\">/graphiql</a></html>"
-                    .to_string(),
-            )
-    });
-
-    println!("Listening on 127.0.0.1:8080");
-
-    let state = warp::any().map(|| {
-        Context {
-            database: &RECIPE_BOOK
-        }
-    });
-    let graphql_filter = juniper_warp::make_graphql_filter(schema(), state.boxed());
-
-    warp::serve(
-        warp::get()
-            .and(warp::path("graphiql"))
-            .and(juniper_warp::graphiql_filter("/graphql", None))
-            .or(homepage)
-            .or(warp::path("graphql").and(graphql_filter))
-            .with(log),
-    )
-    .run(([127, 0, 0, 1], 8080))
-    .await
+    Rocket::build()
+        .manage(Context::new())
+        .manage(Schema::new(
+            Query,
+            EmptyMutation::<Context>::new(),
+            EmptySubscription::<Context>::new(),
+        ))
+        .mount(
+            "/",
+            rocket::routes![graphiql, get_graphql_handler, post_graphql_handler],
+        )
+        .launch()
+        .await
+        .expect("server to launch");
 }
